@@ -25,7 +25,7 @@ markdown.validateLink = function () {
 function DocGen(process) {
   let mainProcess = process;
   let version = '2.1.3';
-  let wkhtmltopdfVersion = 'wkhtmltopdf 0.12.2.1 (with patched qt)'; //output from wkhtmltopdf -V
+  let wkhtmltopdfVersion = 'wkhtmltopdf 0.12.6 (with patched qt)'; //output from wkhtmltopdf -V
   let options;
   let templates = {};
   let meta = {};
@@ -190,8 +190,8 @@ function DocGen(process) {
   };
 
   /*
-        JSON schema validation
-    */
+    JSON schema validation
+  */
 
   let schemas = {
     parameters: {
@@ -334,8 +334,8 @@ function DocGen(process) {
   };
 
   /*
-        load all metadata files (JSON)
-    */
+    load all metadata files (JSON)
+  */
 
   let loadMeta = function () {
     console.log(chalk.green('Loading required JSON metadata files'));
@@ -390,8 +390,8 @@ function DocGen(process) {
   };
 
   /*
-        load all markdown files (source)
-    */
+    load all markdown files (source)
+  */
 
   let loadMarkdown = function () {
     console.log(chalk.green('Loading source files'));
@@ -453,8 +453,8 @@ function DocGen(process) {
   };
 
   /*
-        build the HTML for the table of contents
-    */
+    build the HTML for the table of contents
+  */
 
   let webToc = function () {
     sortPages();
@@ -508,8 +508,8 @@ function DocGen(process) {
   };
 
   /*
-        insert the parameters into all templates
-    */
+    insert the parameters into all templates
+  */
 
   let insertParameters = function () {
     //------------------------------------------------------------------------------------------------------
@@ -685,8 +685,8 @@ function DocGen(process) {
   };
 
   /*
-        process each input into an output
-    */
+    process each input into an output
+  */
 
   let processContent = function () {
     console.log(chalk.green('Generating the static web content'));
@@ -755,8 +755,8 @@ function DocGen(process) {
   };
 
   /*
-        write each html page
-    */
+    write each html page
+  */
 
   let writePages = function () {
     console.log(chalk.green('Writing the web page files'));
@@ -814,8 +814,8 @@ function DocGen(process) {
   };
 
   /*
-        wkthmltopdf options
-    */
+    wkthmltopdf options
+  */
 
   let pdfOptions = [
     ' --zoom 1.0',
@@ -834,6 +834,7 @@ function DocGen(process) {
 
   let getPdfArguments = function () {
     let pdfName = meta.parameters.name.toLowerCase() + '.pdf';
+    pdfOptions.push(' --enable-local-file-access');
     pdfOptions.push(' --javascript-delay ' + options.pdfDelay); //code syntax highlight in wkhtmltopdf 0.12.2.1 fails without a delay (but why doesn't --no-stop-slow-scripts work?)
     pdfOptions.push(' --user-style-sheet ' + __dirname + '/pdf-stylesheet.css');
     pdfOptions.push(' --header-html ' + options.output + 'temp/pdfHeader.html');
@@ -901,8 +902,8 @@ function DocGen(process) {
   };
 
   /*
-        call wkhtmltopdf as an external executable
-    */
+    call wkhtmltopdf as an external executable
+  */
 
   let generatePdf = function () {
     console.log(chalk.green('Creating the PDF copy (may take some time)'));
@@ -974,8 +975,8 @@ function DocGen(process) {
   };
 
   /*
-        cleanup
-    */
+    cleanup
+  */
 
   let cleanUp = function () {
     createRedirect();
