@@ -1,15 +1,15 @@
-var rsvp = require('rsvp');
-var fs = require('fs-extra');
-var path = require('path');
-var cheerio = require('cheerio');
-var markdown = require('markdown-it')('commonmark').enable('table');
-var moment = require('moment');
-var childProcess = require('child_process');
-var schemaValidator = require('z-schema');
-var chalk = require('chalk');
-var spawnArgs = require('spawn-args');
-var cliSpinner = require('cli-spinner').Spinner;
-var imageSizeOf = require('image-size');
+const rsvp = require('rsvp');
+const fs = require('fs-extra');
+const path = require('path');
+const cheerio = require('cheerio');
+const markdown = require('markdown-it')('commonmark').enable('table');
+const moment = require('moment');
+const childProcess = require('child_process');
+const schemaValidator = require('z-schema');
+const chalk = require('chalk');
+const spawnArgs = require('spawn-args');
+const cliSpinner = require('cli-spinner').Spinner;
+const imageSizeOf = require('image-size');
 
 //Allow CommonMark links that use other protocols, such as file:///
 //The markdown-it implementation is more restrictive than the CommonMark spec
@@ -23,14 +23,14 @@ markdown.validateLink = function () {
  */
 
 function DocGen(process) {
-  var mainProcess = process;
-  var version = '2.1.3';
-  var wkhtmltopdfVersion = 'wkhtmltopdf 0.12.2.1 (with patched qt)'; //output from wkhtmltopdf -V
-  var options;
-  var templates = {};
-  var meta = {};
-  var pages = {};
-  var sortedPages = {};
+  let mainProcess = process;
+  let version = '2.1.3';
+  let wkhtmltopdfVersion = 'wkhtmltopdf 0.12.6 (with patched qt)'; //output from wkhtmltopdf -V
+  let options;
+  let templates = {};
+  let meta = {};
+  let pages = {};
+  let sortedPages = {};
 
   this.getVersion = function () {
     return version;
@@ -53,8 +53,8 @@ function DocGen(process) {
   };
 
   /*
-        copy the example source files (template) to any directory, when scaffold command is invoked
-    */
+    copy the example source files (template) to any directory, when scaffold command is invoked
+  */
 
   this.scaffold = function () {
     console.log(chalk.green('Creating scaffold template directory'));
@@ -72,7 +72,7 @@ function DocGen(process) {
         read any file (async)
     */
 
-  var readFile = function (path) {
+  let readFile = function (path) {
     return new rsvp.Promise(function (resolve, reject) {
       fs.readFile(path, 'utf8', function (error, data) {
         if (error) {
@@ -90,7 +90,7 @@ function DocGen(process) {
         write any file (async)
     */
 
-  var writeFile = function (path, data) {
+  let writeFile = function (path, data) {
     return new rsvp.Promise(function (resolve, reject) {
       fs.writeFile(path, data, function (error) {
         if (error) {
@@ -107,7 +107,7 @@ function DocGen(process) {
         copy any directory (sync)
     */
 
-  var copyDirSync = function (source, destination) {
+  let copyDirSync = function (source, destination) {
     try {
       fs.copySync(source, destination);
     } catch (error) {
@@ -125,7 +125,7 @@ function DocGen(process) {
         remake a directory (sync) ... remove and then mkdir in one operation
     */
 
-  var remakeDirSync = function (path) {
+  let remakeDirSync = function (path) {
     try {
       fs.removeSync(path);
       fs.mkdirpSync(path);
@@ -142,7 +142,7 @@ function DocGen(process) {
         remove any directory (sync)
     */
 
-  var removeDirSync = function (path) {
+  let removeDirSync = function (path) {
     try {
       fs.removeSync(path);
     } catch (error) {
@@ -158,9 +158,9 @@ function DocGen(process) {
         load all HTML template files
     */
 
-  var loadTemplates = function () {
+  let loadTemplates = function () {
     console.log(chalk.green('Loading templates'));
-    var files = {
+    let files = {
       main: readFile(__dirname + '/templates/main.html'),
       redirect: readFile(__dirname + '/templates/redirect.html'),
       webCover: readFile(__dirname + '/templates/webCover.html'),
@@ -171,10 +171,10 @@ function DocGen(process) {
     rsvp
       .hash(files)
       .then(function (files) {
-        for (var key in files) {
+        for (let key in files) {
           if (files.hasOwnProperty(key)) {
-            var file = files[key];
-            var dom = cheerio.load(file);
+            let file = files[key];
+            let dom = cheerio.load(file);
             templates[key] = dom;
           }
         }
@@ -190,10 +190,10 @@ function DocGen(process) {
   };
 
   /*
-        JSON schema validation
-    */
+    JSON schema validation
+  */
 
-  var schemas = {
+  let schemas = {
     parameters: {
       title: 'DocGen Parameters Schema',
       type: 'object',
@@ -314,10 +314,10 @@ function DocGen(process) {
     },
   };
 
-  var validateJSON = function (key, data) {
-    var schema = schemas[key];
-    var validator = new schemaValidator();
-    var valid = validator.validate(data, schema);
+  let validateJSON = function (key, data) {
+    let schema = schemas[key];
+    let validator = new schemaValidator();
+    let valid = validator.validate(data, schema);
     if (!valid) {
       console.log(
         chalk.red(
@@ -334,23 +334,23 @@ function DocGen(process) {
   };
 
   /*
-        load all metadata files (JSON)
-    */
+    load all metadata files (JSON)
+  */
 
-  var loadMeta = function () {
+  let loadMeta = function () {
     console.log(chalk.green('Loading required JSON metadata files'));
-    var files = {
+    let files = {
       parameters: readFile(options.input + '/parameters.json'),
       contents: readFile(options.input + '/contents.json'),
     };
     rsvp
       .hash(files)
       .then(function (files) {
-        for (var key in files) {
+        for (let key in files) {
           if (files.hasOwnProperty(key)) {
             //ignore prototype
             try {
-              var file = JSON.parse(files[key]);
+              let file = JSON.parse(files[key]);
               if (validateJSON(key, file)) {
                 meta[key] = file;
               } else {
@@ -372,7 +372,7 @@ function DocGen(process) {
           }
         }
         //add the release notes to the contents list
-        var extra = {
+        let extra = {
           heading: 'Extra',
           column: 5,
           pages: [{ title: 'Release notes', source: 'release-notes.txt' }],
@@ -390,13 +390,13 @@ function DocGen(process) {
   };
 
   /*
-        load all markdown files (source)
-    */
+    load all markdown files (source)
+  */
 
-  var loadMarkdown = function () {
+  let loadMarkdown = function () {
     console.log(chalk.green('Loading source files'));
-    var keys = [];
-    var files = [];
+    let keys = [];
+    let files = [];
     meta.contents.forEach(function (section) {
       section.pages.forEach(function (page) {
         keys.push(page);
@@ -411,13 +411,13 @@ function DocGen(process) {
       .then(function (files) {
         files.forEach(function (page, index) {
           try {
-            var key = keys[index];
+            let key = keys[index];
             if (key.html === true) {
               //allow raw HTML input pages
               pages[key.source] = page;
             } else {
               //otherwise parse input from Markdown into HTML
-              var html = markdown.render(page);
+              let html = markdown.render(page);
               pages[key.source] = html;
             }
           } catch (error) {
@@ -430,7 +430,7 @@ function DocGen(process) {
             mainProcess.exit(1);
           }
         });
-        process();
+        processContent();
       })
       .catch(function (error) {
         console.log(chalk.red('Error loading source files'));
@@ -441,9 +441,9 @@ function DocGen(process) {
       });
   };
 
-  var sortPages = function () {
+  let sortPages = function () {
     //sort the contents by heading
-    var headings = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    let headings = { 1: [], 2: [], 3: [], 4: [], 5: [] };
     meta.contents.forEach(function (section) {
       if (headings.hasOwnProperty(section.column)) {
         headings[section.column].push(section);
@@ -453,18 +453,18 @@ function DocGen(process) {
   };
 
   /*
-        build the HTML for the table of contents
-    */
+    build the HTML for the table of contents
+  */
 
-  var webToc = function () {
+  let webToc = function () {
     sortPages();
-    var pdfName = meta.parameters.name.toLowerCase() + '.pdf';
-    var $ = templates.main;
-    var html = [],
+    let pdfName = meta.parameters.name.toLowerCase() + '.pdf';
+    let $ = templates.main;
+    let html = [],
       i = -1;
     html[++i] = '<div><table class="unstyled"><tr>';
     //build the contents HTML
-    for (var key in sortedPages) {
+    for (let key in sortedPages) {
       if (sortedPages.hasOwnProperty(key)) {
         if (key != 5) {
           //skip the extra column
@@ -473,8 +473,8 @@ function DocGen(process) {
             html[++i] =
               '<ul><li class="dg-tocHeading">' + section.heading + '</li>';
             section.pages.forEach(function (page) {
-              var name = page.source.substr(0, page.source.lastIndexOf('.'));
-              var path = name + '.html';
+              let name = page.source.substr(0, page.source.lastIndexOf('.'));
+              let path = name + '.html';
               html[++i] =
                 '<li><a href="' + path + '">' + page.title + '</a></li>';
             });
@@ -508,17 +508,17 @@ function DocGen(process) {
   };
 
   /*
-        insert the parameters into all templates
-    */
+    insert the parameters into all templates
+  */
 
-  var insertParameters = function () {
+  let insertParameters = function () {
     //------------------------------------------------------------------------------------------------------
     //logo dimensions
-    var hasLogo = false;
-    var logoWidth = 0;
-    var logoHeight = 0;
+    let hasLogo = false;
+    let logoWidth = 0;
+    let logoHeight = 0;
     try {
-      var logo = imageSizeOf(options.input + '/files/images/logo.png');
+      let logo = imageSizeOf(options.input + '/files/images/logo.png');
       logoWidth = logo.width;
       logoHeight = logo.height;
       hasLogo = true;
@@ -529,26 +529,26 @@ function DocGen(process) {
     //------------------------------------------------------------------------------------------------------
 
     //the homepage is the first link in the first heading
-    var homelink = meta.contents[0].pages[0];
-    var homelink =
+    let homelink = meta.contents[0].pages[0];
+    homelink =
       homelink.source.substr(0, homelink.source.lastIndexOf('.')) + '.html';
 
-    var date = moment().format('DD/MM/YYYY');
-    var time = moment().format('HH:mm:ss');
-    var year = moment().format('YYYY');
-    var attribution =
+    let date = moment().format('DD/MM/YYYY');
+    let time = moment().format('HH:mm:ss');
+    let year = moment().format('YYYY');
+    let attribution =
       'Created by DocGen ' + version + ' on ' + date + ' at ' + time + '.';
 
-    var releaseVersion = meta.parameters.version;
+    let releaseVersion = meta.parameters.version;
     if (options.setVersion !== false) {
       releaseVersion = options.setVersion;
     }
-    var releaseDate = meta.parameters.date;
+    let releaseDate = meta.parameters.date;
     if (options.setReleaseDate !== false) {
       releaseDate = options.setReleaseDate;
     }
 
-    var author = '';
+    let author = '';
     if (meta.parameters.author.url !== '') {
       author +=
         '<a href="' +
@@ -560,7 +560,7 @@ function DocGen(process) {
       author += meta.parameters.author.name;
     }
 
-    var owner = '';
+    let owner = '';
     if (meta.parameters.owner.url !== '') {
       owner +=
         '<a href="' +
@@ -572,7 +572,7 @@ function DocGen(process) {
       owner += meta.parameters.owner.name;
     }
 
-    var organization = '';
+    let organization = '';
     if (meta.parameters.organization.url !== '') {
       organization +=
         '<a href="' +
@@ -584,7 +584,7 @@ function DocGen(process) {
       organization += meta.parameters.organization.name;
     }
 
-    var website = '';
+    let website = '';
     if (meta.parameters.website.url !== '') {
       website +=
         '<a href="' +
@@ -596,7 +596,7 @@ function DocGen(process) {
       website += meta.parameters.website.name;
     }
 
-    var backlink = '';
+    let backlink = '';
     if (meta.parameters.backlink.url !== '') {
       backlink +=
         '<a href="' +
@@ -608,7 +608,7 @@ function DocGen(process) {
       backlink += meta.parameters.backlink.name;
     }
 
-    var contributors = '';
+    let contributors = '';
     meta.parameters.contributors.forEach(function (contributor) {
       if (contributor.url !== '') {
         contributors +=
@@ -619,19 +619,19 @@ function DocGen(process) {
     });
     contributors = contributors.replace(/,\s*$/, ''); //remove trailing commas
 
-    var copyright = '&copy; ' + year + ' ' + organization;
+    let copyright = '&copy; ' + year + ' ' + organization;
 
-    var webTitle = meta.parameters.title;
+    let webTitle = meta.parameters.title;
 
-    var webFooter =
+    let webFooter =
       'Version ' + releaseVersion + ' released on ' + releaseDate + '.';
 
-    for (var key in templates) {
+    for (let key in templates) {
       if (templates.hasOwnProperty(key)) {
         $ = templates[key];
         //logo
         if (hasLogo === true) {
-          var logoUrl = 'files/images/logo.png';
+          let logoUrl = 'files/images/logo.png';
           $('#dg-logo').css('background-image', 'url(' + logoUrl + ')');
           $('#dg-logo').css('height', logoHeight + 'px');
           $('#dg-logo').css('line-height', logoHeight + 'px');
@@ -685,18 +685,18 @@ function DocGen(process) {
   };
 
   /*
-        process each input into an output
-    */
+    process each input into an output
+  */
 
-  var process = function () {
+  let processContent = function () {
     console.log(chalk.green('Generating the static web content'));
     webToc();
     insertParameters();
     meta.contents.forEach(function (section) {
       section.pages.forEach(function (page) {
-        var $ = cheerio.load(templates.main.html()); //clone
-        var key = page.source;
-        var content = pages[key];
+        let $ = cheerio.load(templates.main.html()); //clone
+        let key = page.source;
+        let content = pages[key];
         //add relevant container
         if (page.html === true) {
           //raw HTML pages should not be confined to the fixed width
@@ -711,15 +711,15 @@ function DocGen(process) {
         //------------------------------------------------------------------------------------------------------
         //insert permalinks for every page heading
         //when pageToc is enabled, also insert a page-level table of contents
-        var html = [],
+        let html = [],
           i = -1;
-        var headings = $('h1, h2, h3, h4, h5, h6');
+        let headings = $('h1, h2, h3, h4, h5, h6');
         if (headings.length > 0) {
           html[++i] = '<ul class="dg-pageToc">';
         }
         headings.each(function (index) {
-          var label = $(this).text();
-          var anchor = label.toLowerCase().replace(/\s+/g, '-');
+          let label = $(this).text();
+          let anchor = label.toLowerCase().replace(/\s+/g, '-');
           $(this).attr('id', anchor);
           html[++i] = '<li><a href="#' + anchor + '">' + label + '</a></li>';
         });
@@ -745,7 +745,7 @@ function DocGen(process) {
       });
     });
     //add web ownership page
-    var $ = cheerio.load(templates.main.html()); //clone
+    let $ = cheerio.load(templates.main.html()); //clone
     $('#dg-content').html(
       '<div class="w-fixed-width"><div id="dg-innerContent"></div></div>',
     );
@@ -755,18 +755,18 @@ function DocGen(process) {
   };
 
   /*
-        write each html page
-    */
+    write each html page
+  */
 
-  var writePages = function () {
+  let writePages = function () {
     console.log(chalk.green('Writing the web page files'));
-    var promises = {};
+    let promises = {};
     meta.contents.forEach(function (section) {
       section.pages.forEach(function (page) {
-        var key = page.source;
-        var name = key.substr(0, page.source.lastIndexOf('.'));
-        var path = options.output + name + '.html';
-        var html = pages[key].html();
+        let key = page.source;
+        let name = key.substr(0, page.source.lastIndexOf('.'));
+        let path = options.output + name + '.html';
+        let html = pages[key].html();
         promises[key] = writeFile(path, html);
       });
     });
@@ -776,7 +776,7 @@ function DocGen(process) {
       templates.webCover.html(),
     );
     if (options.pdf === true) {
-      var pdfTempDir = options.output + 'temp/';
+      let pdfTempDir = options.output + 'temp/';
       fs.mkdirsSync(pdfTempDir);
       promises['docgenPdfCover'] = writeFile(
         pdfTempDir + 'pdfCover.html',
@@ -814,10 +814,10 @@ function DocGen(process) {
   };
 
   /*
-        wkthmltopdf options
-    */
+    wkthmltopdf options
+  */
 
-  var pdfOptions = [
+  let pdfOptions = [
     ' --zoom 1.0',
     ' --image-quality 100',
     ' --print-media-type',
@@ -832,8 +832,9 @@ function DocGen(process) {
     ' --no-stop-slow-scripts',
   ];
 
-  var getPdfArguments = function () {
-    var pdfName = meta.parameters.name.toLowerCase() + '.pdf';
+  let getPdfArguments = function () {
+    let pdfName = meta.parameters.name.toLowerCase() + '.pdf';
+    pdfOptions.push(' --enable-local-file-access');
     pdfOptions.push(' --javascript-delay ' + options.pdfDelay); //code syntax highlight in wkhtmltopdf 0.12.2.1 fails without a delay (but why doesn't --no-stop-slow-scripts work?)
     pdfOptions.push(' --user-style-sheet ' + __dirname + '/pdf-stylesheet.css');
     pdfOptions.push(' --header-html ' + options.output + 'temp/pdfHeader.html');
@@ -842,26 +843,26 @@ function DocGen(process) {
     pdfOptions.push(
       ' toc --xsl-style-sheet ' + __dirname + '/pdf-contents.xsl',
     );
-    var allPages = '';
-    for (var key in sortedPages) {
+    let allPages = '';
+    for (let key in sortedPages) {
       if (sortedPages.hasOwnProperty(key)) {
         sortedPages[key].forEach(function (section) {
           section.pages.forEach(function (page) {
-            var key = page.source;
-            var name = key.substr(0, page.source.lastIndexOf('.'));
-            var path = options.output + name + '.html';
+            let key = page.source;
+            let name = key.substr(0, page.source.lastIndexOf('.'));
+            let path = options.output + name + '.html';
             allPages += ' ' + path;
           });
         });
       }
     }
-    var args = pdfOptions.join('');
+    let args = pdfOptions.join('');
     args += allPages;
     args += ' ' + options.output + pdfName;
     return spawnArgs(args);
   };
 
-  var checkPdfVersion = function () {
+  let checkPdfVersion = function () {
     if (options.pdf === true) {
       //first check that wkhtmltopdf is installed
       childProcess.exec(options.wkhtmltopdfPath + ' -V', function (
@@ -881,12 +882,12 @@ function DocGen(process) {
           mainProcess.exit(1);
         } else {
           //warn if the version of wkhtmltopdf is not an expected version
-          var actualWkhtmltopdfVersion = stdout.trim();
+          let actualWkhtmltopdfVersion = stdout.trim();
           if (actualWkhtmltopdfVersion !== wkhtmltopdfVersion) {
-            var warning =
+            let warning =
               'Warning: unexpected version of wkhtmltopdf, which may work but is not tested or supported';
-            var expectedVersion = '   expected version: ' + wkhtmltopdfVersion;
-            var detectedVersion =
+            let expectedVersion = '   expected version: ' + wkhtmltopdfVersion;
+            let detectedVersion =
               '   detected version: ' + actualWkhtmltopdfVersion;
             console.log(chalk.yellow(warning));
             console.log(chalk.yellow(expectedVersion));
@@ -901,14 +902,14 @@ function DocGen(process) {
   };
 
   /*
-        call wkhtmltopdf as an external executable
-    */
+    call wkhtmltopdf as an external executable
+  */
 
-  var generatePdf = function () {
+  let generatePdf = function () {
     console.log(chalk.green('Creating the PDF copy (may take some time)'));
-    var args = getPdfArguments();
-    var wkhtmltopdf = childProcess.spawn(options.wkhtmltopdfPath, args);
-    var spinner = new cliSpinner(chalk.green('   Processing... %s'));
+    let args = getPdfArguments();
+    let wkhtmltopdf = childProcess.spawn(options.wkhtmltopdfPath, args);
+    let spinner = new cliSpinner(chalk.green('   Processing... %s'));
     spinner.setSpinnerString('|/-\\');
 
     wkhtmltopdf.on('error', function (error) {
@@ -941,7 +942,7 @@ function DocGen(process) {
         console.log(''); //newline after spinner stops
       }
       if (code !== 0) {
-        var warning =
+        let warning =
           'wkhtmltopdf exited with a warning or error: try the -v option for details';
         console.log(chalk.yellow(warning));
       }
@@ -949,18 +950,18 @@ function DocGen(process) {
     });
   };
 
-  var createRedirect = function () {
+  let createRedirect = function () {
     if (options.redirect) {
-      var parent = options.output.replace(/\/$/, ''); //trim any trailing slash
+      let parent = options.output.replace(/\/$/, ''); //trim any trailing slash
       parent = parent.split(path.sep).slice(-1).pop(); //get name of final directory in the path
-      var homepage = meta.contents[0].pages[0];
-      var homepage =
+      let homepage = meta.contents[0].pages[0];
+      homepage =
         homepage.source.substr(0, homepage.source.lastIndexOf('.')) + '.html';
-      var redirectLink = parent + '/' + homepage;
+      let redirectLink = parent + '/' + homepage;
       $ = templates.redirect;
       $('a').attr('href', redirectLink);
       $('meta[http-equiv=REFRESH]').attr('content', '0;url=' + redirectLink);
-      var file = options.output + '../' + 'index.html';
+      let file = options.output + '../' + 'index.html';
       try {
         fs.outputFileSync(file, $.html(), 'utf-8');
       } catch (error) {
@@ -974,10 +975,10 @@ function DocGen(process) {
   };
 
   /*
-        cleanup
-    */
+    cleanup
+  */
 
-  var cleanUp = function () {
+  let cleanUp = function () {
     createRedirect();
     //remove temp files
     if (options.pdf === true) {

@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
-var docgen = require('./source/docgen.js');
-var program = require('commander');
-var EOL = require('os').EOL;
+let docgen = require('./source/docgen.js');
+let program = require('commander');
 
-var generator = new docgen(process);
+let generator = new docgen(process);
 
 function scaffold(command) {
   generator.setOptions(command);
